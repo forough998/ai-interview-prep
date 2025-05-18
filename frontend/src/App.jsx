@@ -97,15 +97,26 @@ export default function App() {
     submittingRef.current = false;
   };
 
-  const handleStart = async () => {
+const handleStart = async () => {
+  if (!role.trim()) {
+    alert("Please enter a job title before starting the interview.");
+    return;
+  }
+
+  try {
+    const q = await fetchAIQuestion(role, category);   // may throw
     setInterviewStarted(true);
-    const q = await fetchAIQuestion(role || "data engineer", category);
     setQuestion(q);
     setAnswer("");
     answerRef.current = "";
     setTimeLeft(QUESTION_TIME_LIMIT);
     startTimer();
-  };
+  } catch (err) {
+    // err.message comes straight from backend (“Invalid or inappropriate job title.”)
+    alert(err.message);
+  }
+};
+
 
   const handleNext = async () => {
     if (submittingRef.current) return;

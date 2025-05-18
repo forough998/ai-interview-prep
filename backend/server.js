@@ -1,41 +1,54 @@
-
 import express from 'express';
 import axios from 'axios';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
+console.log('🚀  Backend with profanity-filter starting');
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.post('/api/question', async (req, res) => {
-  const { role, category } = req.body;
+  const { role = "", category = "Technical" } = req.body;
+
+  const title = role.trim().toLowerCase();
+
+  const badWords = ['shit','fuck','bitch','asshole','cunt','nigger','faggot','damn'];
+  const hasBadWord = badWords.some(w => title.includes(w));
+
+  const twoWordPattern = /^[a-z]+(?:\s+[a-z]+)+$/;
+
+  const isInvalid = !twoWordPattern.test(title) || hasBadWord;
+
+  if (isInvalid) {
+    console.log('Blocked title →', role);
+    return res.status(400).json({ error: 'Please enter a real, appropriate job title (e.g. "Data Engineer").' });
+  }
+
   try {
-    const response = await axios.post(
+    const { data } = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
         model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'user',
-            content: `Generate one ${category.toLowerCase()} interview question for a ${role}.`,
-          },
-        ],
-        temperature: 0.7,
+        messages: [{
+          role: 'user',
+          content: `Generate one ${category.toLowerCase()} interview question for a ${title}.`
+        }],
+        temperature: 0.7
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+        }
       }
     );
-
-    res.json({ question: response.data.choices[0].message.content });
-  } catch (error) {
-    console.error("Backend error:", error.response?.data || error.message);
-    res.status(500).json({ error: error.message });
+    res.json({ question: data.choices[0].message.content.trim() });
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.status(500).json({ error: 'OpenAI request failed.' });
   }
 });
 
@@ -89,4 +102,3 @@ Feedback: <short feedback>
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
