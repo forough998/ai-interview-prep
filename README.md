@@ -24,8 +24,8 @@ The app generates AI-powered interview questions tailored to the chosen job role
 
 ---
 
-##  Live Demo
-| Part          | URL |
-|---------------|-----|
-| Front-end (Vercel) | `https://ai-interview-prep-fawn.vercel.app/` |
-| Back-end (Render)  | `https://ai-interview-prep-ydc7.onrender.com` |
+## 🌐 Live Demo
+| Part                | URL |
+|---------------------|-----|
+| Front-end (Vercel)  | <https://ai-interview-prep-fawn.vercel.app> |
+| Back-end (Render)   | <https://ai-interview-prep-ydc7.onrender.com> |
